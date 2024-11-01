@@ -1,8 +1,8 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: lekhoa248
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
-app: project4-khoalnn-v1
-service: serverless-todo-app-v1
+app: project4-khoalnn
+service: serverless-todo-app
 
 frameworkVersion: '4'
 
