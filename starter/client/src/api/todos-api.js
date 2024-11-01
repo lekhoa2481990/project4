@@ -12,9 +12,25 @@ export async function getTodos(idToken) {
       }
     }
   )
+
+  
   console.log('Todos:', response.data)
   return response.data.items
 }
+
+// export async function getTodos(idToken) {
+//   console.log('Fetching groups')
+
+//   const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/todos`, {
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${idToken}`
+//     }
+//   })
+//   const result = await response.json()
+//   console.log('Todos:', response.data)
+//   return result.items
+// }
 
 export async function createTodo(idToken, newTodo) {
   const response = await Axios.post(
@@ -27,6 +43,8 @@ export async function createTodo(idToken, newTodo) {
       }
     }
   )
+  
+  debugger
   return response.data.item
 }
 
