@@ -19,16 +19,6 @@ export async function handler(event) {
   const authorization = event.headers.Authorization
   const userId = getUserId(authorization)
 
-  // console.log('userId: ', userId)
-  // console.log('table: ', todosTable)
-  // console.log('index: ', todosIndex)
-
-  // const scanCommand = {
-  //   TableName: todosTable
-  // }
-  // const result = await dynamoDbClient.scan(scanCommand)
-  // const items = result.Items
-
   const result = await dynamoDbClient.query({
     TableName: todosTable,
     // IndexName: todosIndex,

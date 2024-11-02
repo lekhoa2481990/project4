@@ -18,20 +18,6 @@ export async function getTodos(idToken) {
   return response.data.items
 }
 
-// export async function getTodos(idToken) {
-//   console.log('Fetching groups')
-
-//   const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/todos`, {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`
-//     }
-//   })
-//   const result = await response.json()
-//   console.log('Todos:', response.data)
-//   return result.items
-// }
-
 export async function createTodo(idToken, newTodo) {
   const response = await Axios.post(
     `${process.env.REACT_APP_API_ENDPOINT}/todos`,
@@ -45,7 +31,8 @@ export async function createTodo(idToken, newTodo) {
   )
   
   debugger
-  return response.data.item
+  console.log('newTodo:', response.data)
+  return response.data.newItem
 }
 
 export async function patchTodo(idToken, todoId, updatedTodo) {
@@ -71,6 +58,7 @@ export async function deleteTodo(idToken, todoId) {
 }
 
 export async function getUploadUrl(idToken, todoId) {
+  debugger
   const response = await Axios.post(
     `${process.env.REACT_APP_API_ENDPOINT}/todos/${todoId}/attachment`,
     '',
@@ -81,9 +69,12 @@ export async function getUploadUrl(idToken, todoId) {
       }
     }
   )
+  debugger
   return response.data.uploadUrl
+
 }
 
 export async function uploadFile(uploadUrl, file) {
+  debugger
   await Axios.put(uploadUrl, file)
 }

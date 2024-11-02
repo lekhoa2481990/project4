@@ -1,5 +1,5 @@
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 import { v4 as uuidv4 } from 'uuid'
 import { getUserId } from '../../utils/utils.mjs'
 // import { getUserId } from '../utils/logger.mjs'
@@ -7,60 +7,60 @@ import { getUserId } from '../../utils/utils.mjs'
 
 
 const dynamoDbClient = DynamoDBDocument.from(new DynamoDB())
+// const client = new DynamoDBClient({});
+// const docClient = DynamoDBDocumentClient.from(client);
 const todosTable = process.env.TODOS_TABLE
 
 export async function handler(event) {
   const todoId = event.pathParameters.todoId
   const updatedTodo = JSON.parse(event.body)
 
+ console.log('updatedTodo: ', updatedTodo)
   console.log('Processing event: ', 'Create Todo')
   // const itemId = uuidv4()
 
-  const parsedBody = JSON.parse(event.body)
+  // const parsedBody = JSON.parse(event.body)
 
   const authorization = event.headers.Authorization
   const userId = getUserId(authorization)
 
-  const updateItem = {
-    todoId: todoId,
-    userId,
-    ...parsedBody
-  }
+  // const newItem = {
+  //   todoId: itemId,
+  //   userId,
+  //   // // done,
+  //   ...updatedTodo
+  // }
 
-  await dynamoDbClient.put({
-    TableName: todosTable,
-    Item: updateItem
-  })
+  // logger.info('new item', { newItem})
 
-  await dynamoDbClient.delete({
-    TableName: todosTable,
-    Item: updateItem
-  })
+const done = updatedTodo.done
+console.log('done: ', done)
 
-//   await dynamoDbClient.send({
+//   await dynamoDbClient.put({
 //     TableName: todosTable,
-//     Key: { path: { S: event.path } },
-//     UpdateExpression: 'ADD hits :incr',
-//     ExpressionAttributeValues: { ':incr': { N: '1' } }
-// })
-
-// await ddbDocClient.send(
-//   new UpdateCommand({
-//     TableName: todosTable,
-//     Key: {
-//       pk: userId,    // Partition key
-//       sk: todoId,                 // Sort key
-//     },
-//     ExpressionAttributeNames: {
-//       "#n": "name",
-//     },
-//     UpdateExpression: "set #n = :nm",
-//     ExpressionAttributeValues: {
-//       ":nm": "Big Jim Bob",
-//     },
-//     ReturnValues: "ALL_NEW",
+//     Item: updatedTodo
 //   })
-// );
+
+
+await dynamoDbClient.send(
+  new UpdateCommand({
+    TableName: todosTable,
+    Key: {
+      userId: userId,    // Partition key
+      todoId: todoId,                 // Sort key
+    },
+    // ExpressionAttributeNames: {
+    //   "#n": "name",
+    // },
+    // UpdateExpression: "set #n = :nm",
+    UpdateExpression: "set done = :done",
+
+    ExpressionAttributeValues: {
+      ":done": done
+    },
+    ReturnValues: "ALL_NEW",
+  })
+);
   
   // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
   return {
@@ -69,7 +69,7 @@ export async function handler(event) {
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      newItem
+      updatedTodo
     })
   }
 }

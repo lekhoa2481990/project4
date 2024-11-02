@@ -18,13 +18,13 @@ export function NewTodoInput({ onNewTodo }) {
         scope: 'write:todos'
       })
       const dueDate = calculateDueDate()
-      // done = true
-      // const done = new Boolean(true);
-      const createdTodo = await createTodo(accessToken, {
+
+      const todo = await createTodo(accessToken, {
         name: newTodoName,
         dueDate
       })
-      onNewTodo(createdTodo)
+      
+      onNewTodo(todo)
     } catch (e) {
       console.log('Failed to created a new TODO', e)
       alert('Todo creation failed')

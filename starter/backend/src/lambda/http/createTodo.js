@@ -21,7 +21,7 @@ export async function handler(event) {
 
   const authorization = event.headers.Authorization
   const userId = getUserId(authorization)
-  const done = new Boolean(true);
+  // const done = new Boolean(true);
 
   // const userId = 'Khoa'
   const newItem = {

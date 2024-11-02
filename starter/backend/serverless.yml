@@ -4,15 +4,15 @@ org: lekhoa248
 app: project4-khoalnn
 service: serverless-todo-app
 
-frameworkVersion: '4'
+frameworkVersion: '4.4.6'
+
+# custom:
+#   serverless-offline:
+#     port: 9000
 
 plugins:
   - serverless-iam-roles-per-function
-  # - serverless-webpack
-  # - serverless-plugin-tracing
-  # - serverless-reqvalidator-plugin
-  
-
+  - serverless-offline
 provider:
   name: aws
   runtime: nodejs20.x
@@ -23,8 +23,9 @@ provider:
 
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
-    # IMAGES_TABLE: Images-${self:provider.stage}
+    IMAGES_TABLE: Images-Todo-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
+    IMAGE_ID_INDEX: ImageIdIndex
     IMAGES_S3_BUCKET: udagram-images-fffff-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
@@ -38,11 +39,11 @@ provider:
             - dynamodb:GetItem
             - dynamodb:DeleteItem
           Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-        # - Effect: Allow
-        #   Action:
-        #     - dynamodb:Query
-        #     - dynamodb:PutItem
-        #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:PutItem
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
         - Effect: Allow
           Action:
             - dynamodb:Query
@@ -98,6 +99,18 @@ functions:
           request:
             schemas:
               application/json: ${file(models/create-todo-request.json)}
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: "Allow"
+        Action:
+          - "xray:PutTraceSegments"
+          - "xray:PutTelemetryRecords"
+        Resource:
+          - "*"
 
   # TODO: Configure this function
   UpdateTodo:
@@ -108,9 +121,21 @@ functions:
           authorizer: Auth
           path: todos/{todoId}
           cors: true
-          request:
-            schemas:
-              application/json: ${file(models/create-image-request.json)}
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: "Allow"
+        Action:
+          - "xray:PutTraceSegments"
+          - "xray:PutTelemetryRecords"
+        Resource:
+          - "*"
+          # request:
+          #   schemas:
+          #     application/json: ${file(models/create-image-request.json)}
 
   # TODO: Configure this function
   DeleteTodo:
@@ -142,10 +167,23 @@ functions:
           method: post
           authorizer: Auth
           path: todos/{todoId}/attachment
+          cors: true
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: "Allow"
+        Action:
+          - "xray:PutTraceSegments"
+          - "xray:PutTelemetryRecords"
+        Resource:
+          - "*"
           # request:
           #   schemas:
-          #     application/json: ${file(models/create-todo-request.json)}
-
+          #     application/json: ${file(models/create-image-request.json)}
+    # url: true
   # GetTodo:
   #   handler: src/lambda/http/getImage.handler
   #   events:
@@ -194,6 +232,31 @@ resources:
               KeyType: HASH
             - AttributeName: createdAt
               KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    ImagesDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: todoId
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+          - AttributeName: imageId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: todoId
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.IMAGES_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.IMAGE_ID_INDEX}
+            KeySchema:
+            - AttributeName: imageId
+              KeyType: HASH
             Projection:
               ProjectionType: ALL
 
