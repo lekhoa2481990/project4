@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { getUserId } from '../../utils/utils.mjs'
 // import { getUserId } from '../utils/logger.mjs'
 import { createLogger } from '../../utils/logger.mjs'
+import { createTodo } from '../../businessLogic/todo.mjs'
+
 
 
 const dynamoDbClient = DynamoDBDocument.from(new DynamoDB())
@@ -15,29 +17,28 @@ export async function handler(event) {
   const newTodo = JSON.parse(event.body)
 
   console.log('Processing event: ', 'Create Todo')
-  const itemId = uuidv4()
-
-  // const parsedBody = JSON.parse(event.body)
+  // const itemId = uuidv4()
 
   const authorization = event.headers.Authorization
   const userId = getUserId(authorization)
-  // const done = new Boolean(true);
+ 
+  // const newItem = {
+  //   todoId: itemId,
+  //   userId,
+  //   ...newTodo
+  // }
 
-  // const userId = 'Khoa'
-  const newItem = {
-    todoId: itemId,
-    userId,
-    // done,
-    ...newTodo
-  }
+  // logger.info('new item', { newItem})
 
+  
+
+  // await dynamoDbClient.put({
+  //   TableName: todosTable,
+  //   Item: newItems
+  // })
+
+  const newItem = await createTodo(newTodo, userId)
   logger.info('new item', { newItem})
-
-
-  await dynamoDbClient.put({
-    TableName: todosTable,
-    Item: newItem
-  })
 
   return {
     statusCode: 201,
