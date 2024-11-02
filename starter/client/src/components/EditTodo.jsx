@@ -4,13 +4,30 @@ import { useParams } from 'react-router-dom'
 import { Button, Form } from 'semantic-ui-react'
 import { getUploadUrl, uploadFile } from '../api/todos-api'
 
+// import React, {useState} from 'react'
+// import { Form, Button } from 'semantic-ui-react'
+// import { useParams } from 'react-router-dom'
+// import { createImage, uploadFile } from '../api/images-api'
+
 const UploadState = {
   NoUpload: 'NoUpload',
   FetchingPresignedUrl: 'FetchingPresignedUrl',
   UploadingFile: 'UploadingFile'
 }
 
+// const NO_UPLOAD = 'NoUpload'
+// const UPLOADING_DATA = 'UploadingData'
+// const UPLOADING_FILE = 'UploadingFile'
+
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN
+
 export function EditTodo() {
+  // const { todoId } = useParams()
+  // const [title, setTitle] = useState('')
+  // const [file, setFile] = useState(undefined)
+  // const [uploadState, setUploadState] = useState(NO_UPLOAD)
+
   function renderButton() {
     return (
       <div>
@@ -26,6 +43,7 @@ export function EditTodo() {
   }
 
   function handleFileChange(event) {
+    debugger
     const files = event.target.files
     if (!files) return
 
@@ -35,6 +53,7 @@ export function EditTodo() {
   async function handleSubmit(event) {
     event.preventDefault()
 
+    debugger
     try {
       if (!file) {
         alert('File should be selected')
@@ -43,11 +62,13 @@ export function EditTodo() {
 
       setUploadState(UploadState.FetchingPresignedUrl)
       const accessToken = await getAccessTokenSilently({
-        audience: `https://test-endpoint.auth0.com/api/v2/`,
+        audience: `https://${domain}/api/v2/`,
         scope: 'write:todos'
       })
+      debugger
       const uploadUrl = await getUploadUrl(accessToken, todoId)
 
+      debugger
       setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, file)
 
